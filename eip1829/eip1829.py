@@ -34,13 +34,18 @@ def multiply(X, Y, s, alpha, beta):
     return (rX, rY)
 
 
-def is_on_curve(alpha, beta, x, y):
+def is_on_curve(x, y, alpha, beta):
     """
     y² = x³ + α ⋅ x + β  mod  m
     """
     yy = y * y
     rhs = x**3 + (alpha * x) + beta
     return yy == rhs
+
+
+def recover_y(x, alpha, beta):
+    yy = x**3 + (alpha * x) + beta
+    return y.sqrt()
 
 
 def is_valid_field_element(m, value):
