@@ -1,5 +1,5 @@
 # p = 2^224 (2^32 - 1) + 2^192 + 2^96 - 1 
-m = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
+p = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
 a = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC
 b = 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B
 
@@ -17,6 +17,6 @@ g1_times_five = (0x51590B7A515140D2D784C85608668FDFEF8C82FD1F5BE52421554A0DC3D03
 
 from eip1829.eip1829 import eip1829
 
-assert eip1829(m, a, b, [2], [g1]) == g1_times_two
-assert eip1829(m, a, b, [3], [g1]) == g1_times_three
-assert eip1829(m, a, b, [5], [g1]) == g1_times_five
+assert eip1829(p, a, b, 2, g1[0], 2 + (g1[1] % 2)) == g1_times_two
+assert eip1829(p, a, b, 3, g1[0], 2 + (g1[1] % 2)) == g1_times_three
+assert eip1829(p, a, b, 5, g1[0], 2 + (g1[1] % 2)) == g1_times_five

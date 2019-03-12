@@ -25,7 +25,7 @@
 
 import sys
 import bitstring
-from math import ceil, log2
+from math import ceil, log
 from os import urandom
 from collections import defaultdict
 from .numbertheory import square_root_mod_prime
@@ -121,14 +121,14 @@ class FQ(object):
         return FQ((self.n - on) % self.m, self.m)
 
     def to_bytes(self, endian='big'):
-        nbits = ceil(log2(self.m))
+        nbits = ceil(log(self.m, 2))
         nbits += 8 - (nbits % 8)
         nbytes = nbits // 8
         return self.n.to_bytes(nbytes, endian)
 
     def bits(self):
         # TODO: endian
-        nbits = ceil(log2(self.m))
+        nbits = ceil(log(self.m, 2))
         bits = bin(self.n)[2:][::-1].ljust(nbits, '0')
         return bitstring.BitArray('0b' + bits)
 
@@ -185,7 +185,7 @@ class FQ(object):
     def random(cls, modulus):
         if isinstance(modulus, FQ):
             modulus = modulus.m
-        nbytes = ceil(ceil(log2(modulus)) / 8) + 1
+        nbytes = ceil(ceil(log(modulus, 2)) / 8) + 1
         rand_n = int.from_bytes(urandom(nbytes), 'little')
         return FQ(rand_n, modulus)
 

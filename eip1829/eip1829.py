@@ -1,4 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from .field import FQ, int_types
+
+
+class EIP1829Error(Exception):
+    pass
 
 
 def doubling(x1, y1, a, b):
@@ -53,7 +59,7 @@ def recover_y(x, a, b):
 def coerce_integer(value):
     # From: http://www.secg.org/sec1-v2.pdf §2.3.8 "Octet-String-to-Integer Conversion"
     if not isinstance(value, int_types):
-        raise TypeError("Requires integer type")
+        raise EIP1829Error("Requires integer type")
     # TODO: conversion from bytes (big-endian)
     return value
 
@@ -61,7 +67,7 @@ def coerce_integer(value):
 def coerce_field_element(m, value):
     value = coerce_integer(value)
     if value < 0 or value >= m:
-        raise ValueError("Outside of field")
+        raise EIP1829Error("Outside of field")
     return FQ(value, m)
 
 
@@ -69,7 +75,7 @@ def coerce_octet(value):
     if not isinstance(value, int_types):
         raise TypeError("Requires integer type")
     if (value & 0xFF) != value:
-        raise ValueError("Not an octet")
+        raise EIP1829Error("Not an octet")
     return value
 
 
@@ -83,7 +89,7 @@ def coerce_Y(X, Y, a, b, p):
     #  - 2.3. If Y = 2, set ỹ = 0, and if Y = 3, set ỹ = 1.
     #         Otherwise output “invalid” and stop.
     if Y in [2, 3]:
-        ytilda = 0 if Y == 2 else 0
+        ytilda = Y % 2
 
         #  - 2.4.1. If q = p is an odd prime, compute the field element α ≡ x^3 + ax + b (mod p)
         #           and compute a square root β of α modulo p.
@@ -94,12 +100,12 @@ def coerce_Y(X, Y, a, b, p):
         # TODO: normalise the value of the result of the square root in `recover_y`?
 
         #           otherwise set y = β if β ≡ ỹ (mod 2), and set y = p − β if β !≡ ỹ (mod 2).
-        if (Y % 2) != ytilda:
+        if (int(Y) % 2) != ytilda:
             Y = -Y
 
         return Y
 
-    raise RuntimeError("Invalid value for Y (%r)" % (Y,))
+    raise EIP1829Error("Invalid value for Y coordinate signdness (%r)" % (Y,))
 
 
 def eip1829(p, a, b, *args):
@@ -113,12 +119,12 @@ def eip1829(p, a, b, *args):
     (Cx, Cy) := ecmul(p, α, β, s0, Ax0, As0, s1, Ax1, As1, ...)
     """
     if len(args) % 3 != 0:
-        raise ValueError('Number of arguments must be divisible by 3')
+        raise EIP1829Error('Number of arguments must be divisible by 3')
 
     # field modulus for F_p
     p = coerce_integer(p)
     if p <= 2:
-        raise ValueError("Invalid Modulus")
+        raise EIP1829Error("Invalid Modulus")
 
     # Parameters `a` and `b` of the curve equation
     a = coerce_field_element(p, a)
