@@ -83,7 +83,9 @@ def coerce_Y(X, Y, a, b, p):
     # - 1. If M = 0, output P = O
     if Y == 0:
         Y = FQ(0, p)
-        assert X == 0  # Sanity check
+        # XXX: is Infinity always (0,0) for Short Weierstrass curves?
+        if X != 0:
+            raise EIP1829Error("Must specify X coordinate as zero for infinity")
         return Y
 
     #  - 2.3. If Y = 2, set ỹ = 0, and if Y = 3, set ỹ = 1.

@@ -1,6 +1,7 @@
+from __future__ import print_function
 import sys
 
-from eip1829.eip1829 import eip1829
+from eip1829.eip1829 import eip1829, EIP1829Error
 
 
 def main(argv):
@@ -16,9 +17,20 @@ def main(argv):
 			line = [int(_, 16) for _ in line.strip().split(',')]
 			if len(line) < 8:
 				raise RuntimeError('Invalid number of arguments')
-			expected = tuple(line[:2])
-			arguments = line[2:]
-			actual = eip1829(*arguments)
+			is_error = line[0]
+			expected = tuple(line[1:3])
+			arguments = line[3:]
+			try:
+				actual = eip1829(*arguments)
+			except EIP1829Error as ex:
+				if not is_error:
+					raise ex
+			else:
+				if is_error:
+					print("Arguments:", arguments)
+					print("Expected:", expected)
+					print("Actual:", actual)
+					raise RuntimeError("Expected error, got no error!")
 			if expected != actual:
 				print("Arguments:", arguments)
 				print("Expected:", expected)
